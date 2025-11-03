@@ -1,22 +1,33 @@
-# Telex Code Helper (Python)
+# 🚀 Telex.im Code Helper Agent
 
-A simple Telex.im AI agent written in Python + Flask. It explains Python code, formats snippets and can run very small safe Python snippets for demo.
+**Live Deployment:** https://web-production-a4d44.up.railway.app
 
-## Run locally
-1. python -m venv venv
-2. source venv/bin/activate
-3. pip install -r requirements.txt
-4. export TELEX_API_KEY=...
-5. python telex_agent.py
-6. ngrok http 5000
+## ✅ What's Completed
+- **Agent Development:** Full Python Flask implementation
+- **API Endpoints:** Health, workflow, agent endpoints
+- **Deployment:** Live on Railway with CI/CD
+- **Features:** Code analysis, concept explanations, multi-language support
+- **Testing:** All endpoints verified and working
 
-## Webhook
-Point your Mastra/Telex workflow node to `https://<ngrok>.ngrok.io/webhook`.
+## 🔧 Technical Stack
+- **Backend:** Python Flask
+- **Deployment:** Railway.app
+- **API:** RESTful endpoints with JSON responses
+- **Integration:** Telex A2A protocol compatible
 
-## Commands (as a user message)
-- `explain: <python code>` — returns an explanation (uses LLM if OPENAI_API_KEY set)
-- `format: <code>` — returns code in a triple-backtick block
-- `run: <python code>` — runs small snippet (demo only)
+## 📋 API Endpoints
+- `GET /` - Agent information
+- `GET /health` - Health monitoring
+- `GET /workflow` - Telex workflow configuration
+- `POST /a2a/agent/codeHelper` - Main agent endpoint
 
-## Security & production
-Do not run untrusted code using this demo in production. Use proper sandboxing.
+## 🎯 Integration Status
+✅ **Agent Built & Deployed**
+✅ **All Endpoints Functional** 
+✅ **Ready for Telex A2A Integration**
+⏳ **Workflow Integration** - In progress
+
+## 🚀 Local Development
+```bash
+pip install -r requirements.txt
+python app.py
