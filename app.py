@@ -105,7 +105,7 @@ def workflow():
                 "position": [500, 200],
                 "type": "a2a/python-a2a-node",
                 "typeVersion": 1,
-                "url": "https://your-deployment-url.herokuapp.com/a2a/agent/codeHelper"
+                "url": "https://web-production-a4d44.up.railway.app/a2a/agent/codeHelper"
             }
         ],
         "pinData": {},
