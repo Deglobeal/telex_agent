@@ -126,7 +126,7 @@ def workflow():
         "category": "development",
         "description": "AI-powered code analysis and programming assistance",
         "id": "python_code_helper_v1",
-        "long_description": "A helpful AI agent providing code analysis, explanations, and best practices for developers using multiple programming languages.",
+        "long_description": "You are a helpful code assistant that provides code analysis, programming explanations, and development guidance. Your primary function is to help developers with code review, concept explanations, and best practices across multiple programming languages including Python, JavaScript, TypeScript, Java, and more.",
         "name": "python_code_helper",
         "nodes": [
             {
@@ -139,12 +139,15 @@ def workflow():
                 "url": "https://web-production-a4d44.up.railway.app/a2a/agent/codeHelper"
             }
         ],
+        "pinData": {},
         "settings": {
             "executionOrder": "v1"
         },
         "short_description": "AI code analysis and programming help"
     }
     return jsonify(workflow_json)
+
+
 
 @app.route('/a2a/agent/codeHelper', methods=['POST'])
 def handle_agent():
