@@ -11,16 +11,17 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# Define the Code Helper Agent
 class CodeHelperAgent:
     def __init__(self):
         self.name = "Python Code Helper"
         self.version = "1.0.0"
-    
+    # Analyze code and provide suggestions
     def analyze_code(self, code: str, language: str) -> dict:
         """Analyze code and provide suggestions"""
         suggestions = []
         issues = []
-        
+        # Basic checks
         if not code.strip():
             return {"analysis": "No code provided"}
         
@@ -29,7 +30,8 @@ class CodeHelperAgent:
             if "import *" in code:
                 issues.append("Avoid 'import *' - it pollutes namespace")
                 suggestions.append("Import specific functions instead")
-            
+            # Check for use of eval
+
             if "eval(" in code:
                 issues.append("eval() can be dangerous")
                 suggestions.append("Use ast.literal_eval() or safer alternatives")
@@ -49,7 +51,7 @@ class CodeHelperAgent:
             "issues": issues,
             "line_count": len(lines)
         }
-    
+    # Explain programming concepts
     def explain_concept(self, concept: str) -> str:
         """Explain programming concepts"""
         concepts = {
@@ -60,12 +62,12 @@ class CodeHelperAgent:
             "docker": "Docker containers package applications with all dependencies, ensuring consistency across environments.",
             "git": "Git is a distributed version control system for tracking code changes. It allows branching, merging, and collaboration."
         }
-        
+        # Return explanation or default message
         return concepts.get(concept.lower(), f"{concept} is a programming concept worth learning! I can explain OOP, API, REST, MVC, Docker, Git.")
 
 # Initialize agent
 agent = CodeHelperAgent()
-
+# Helper functions for JSON-RPC handling
 def extract_user_message(data):
     """Extract user message from JSON-RPC request"""
     try:
@@ -87,7 +89,7 @@ def extract_user_message(data):
     except Exception as e:
         logger.error(f"Error extracting message: {str(e)}")
         return ""
-
+# Create JSON-RPC response
 def create_jsonrpc_response(request_id, response_text, user_message=None, state="completed"):
     """Create JSON-RPC 2.0 response"""
     task_id = str(uuid.uuid4())
@@ -112,7 +114,7 @@ def create_jsonrpc_response(request_id, response_text, user_message=None, state=
             "taskId": None,
             "metadata": None
         })
-    
+    # Append agent response to history
     history.append({
         "kind": "message",
         "role": "agent",
@@ -144,9 +146,10 @@ def create_jsonrpc_response(request_id, response_text, user_message=None, state=
             ]
         }
     ]
-    
+    # Construct final response
     return {
-        "jsonrpc": "2.0",
+        "jsonrpc": "2.0", # JSON-RPC version 
+        # Unique request ID
         "id": request_id or "",
         "result": {
             "id": task_id,
@@ -165,6 +168,7 @@ def create_jsonrpc_response(request_id, response_text, user_message=None, state=
                             "file_url": None
                         }
                     ],
+                    # Unique message ID
                     "messageId": str(uuid.uuid4()),
                     "taskId": task_id,
                     "metadata": None
@@ -175,14 +179,14 @@ def create_jsonrpc_response(request_id, response_text, user_message=None, state=
             "kind": "task"
         }
     }
-
+# Process user message and generate response
 def process_user_message(user_message):
     """Process user message and return appropriate response"""
     if not user_message:
         return "Please provide a message for analysis."
     
     user_message_lower = user_message.lower()
-
+    # Determine action based on keywords
     if any(word in user_message_lower for word in ['analyze', 'review', 'check code']):
         return (
             "🔍 **Code Analysis Ready**\n\n"
@@ -194,6 +198,7 @@ def process_user_message(user_message):
             "**Example:**\n"
             "\"Analyze this Python code:\n```python\ndef calculate(a, b):\n    return a + b\n```\""
         )
+    # Analyze code if code snippet is detected
     elif any(word in user_message_lower for word in ['explain', 'what is', 'tell me about']):
         concepts = ['oop', 'api', 'rest', 'mvc', 'docker', 'git']
         found_concept = next((c for c in concepts if c in user_message_lower), 'programming')
@@ -211,6 +216,7 @@ def process_user_message(user_message):
             "- explain OOP\n"
             "- what is REST API"
         )
+    # Default welcome message
     else:
         return (
             "👋 **Welcome to Code Helper!**\n\n"
@@ -220,7 +226,7 @@ def process_user_message(user_message):
             "• 💡 Suggest best practices\n\n"
             "Type 'help' to see options!"
         )
-
+# Flask endpoints
 @app.route('/')
 def home():
     return jsonify({
@@ -247,7 +253,7 @@ def home():
             "timestamp": time.time()
         }
     })
-
+# Health check endpoint
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
@@ -274,7 +280,7 @@ def health():
             "timestamp": time.time()
         }
     })
-
+# Workflow configuration endpoint
 @app.route('/workflow', methods=['GET'])
 def workflow():
     """Telex.im workflow configuration"""
@@ -303,7 +309,7 @@ def workflow():
         "short_description": "AI code analysis and programming help"
     }
     return jsonify(workflow_json)
-
+# JSON-RPC 2.0 endpoint for Telex.im
 @app.route('/a2a/lingflow', methods=['POST'])
 def handle_lingflow():
     """Handle JSON-RPC 2.0 requests for Telex.im"""
@@ -345,11 +351,11 @@ def handle_lingflow():
         )
         
         return jsonify(response_data)
-        
+        # Handle exceptions
     except Exception as e:
         logger.error(f"Error processing lingflow request: {str(e)}")
         response_data = create_jsonrpc_response(
-            request_id=data.get('id', ''),
+            request_id=data.get('id', ''), # type: ignore
             response_text=f"Error processing request: {str(e)}",
             state="failed"
         )
@@ -359,7 +365,7 @@ def handle_lingflow():
 @app.route('/a2a/agent/codeHelper', methods=['POST'])
 def handle_agent():
     """Main agent endpoint for Telex.im"""
-    try:
+    try: # Extract request data
         data = request.get_json(silent=True) or {}
         user_message = data.get('message', '').strip()
         context = data.get('context', {})
@@ -370,7 +376,7 @@ def handle_agent():
             response_msg = "❌ Please provide a 'message' in your JSON payload."
         else:
             response_msg = process_user_message(user_message)
-
+        # Return structured response
         return jsonify({
             "status": "success",
             "data": {
@@ -395,7 +401,7 @@ def handle_agent():
                 "timestamp": time.time()
             }
         })
-
+    # Handle exceptions
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}")
         return jsonify({
@@ -411,7 +417,7 @@ def handle_agent():
                 "timestamp": time.time()
             }
         }), 500
-
+# Handle invalid request methods
 @app.route('/a2a/agent/codeHelper', methods=['GET'])
 def handle_agent_get():
     return jsonify({
@@ -427,7 +433,7 @@ def handle_agent_get():
             "timestamp": time.time()
         }
     }), 405
-
+# Run the Flask app
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'True').lower() == 'true'
